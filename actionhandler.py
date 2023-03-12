@@ -1,31 +1,23 @@
-# actionhandler.py
 import pyautogui
-import win32gui
-import win32api
-import win32con
+import ctypes
 
 class OSRSGame:
     def __init__(self):
         # Find the game window
         self.game_window = None
-        windows = []
-        win32gui.EnumWindows(lambda hwnd, windows: windows.append(hwnd), windows)
-        for hwnd in windows:
-            if win32gui.GetWindowText(hwnd) == 'Old School RuneScape':
-                self.game_window = hwnd
-                break
+        user32 = ctypes.windll.user32
+        user32.EnumWindows(self.enum_windows_callback, 0)
 
         if not self.game_window:
-            raise Exception("Could not find Old School RuneScape window")
+            raise Exception("Could not find Runelite window")
 
         # Get the game window position and size
-        self.left, self.top, self.right, self.bottom = win32gui.GetWindowRect(self.game_window)
+        self.left, self.top, self.right, self.bottom = self.get_window_rect()
 
     def press_key(self, key):
         # Press a keyboard key
-        vk_code = win32api.MapVirtualKey(ord(key), win32con.MAPVK_VK_TO_VSC)
-        win32api.keybd_event(vk_code, 0, 0, 0)
-        win32api.keybd_event(vk_code, 0, win32con.KEYEVENTF_KEYUP, 0)
+        ctypes.windll.user32.keybd_event(ord(key), 0, 0, 0)
+        ctypes.windll.user32.keybd_event(ord(key), 0, 2, 0)
 
     def move_mouse(self, x, y):
         # Move the mouse to a position within the game window
@@ -35,10 +27,26 @@ class OSRSGame:
         # Click the mouse button within the game window
         button = button.lower()
         if button == 'left':
-            win32api.SendMessage(self.game_window, win32con.WM_LBUTTONDOWN, win32con.MK_LBUTTON, 0)
-            win32api.SendMessage(self.game_window, win32con.WM_LBUTTONUP, 0, 0)
+            ctypes.windll.user32.mouse_event(0x0002, 0, 0, 0, 0)
+            ctypes.windll.user32.mouse_event(0x0004, 0, 0, 0, 0)
         elif button == 'right':
-            win32api.SendMessage(self.game_window, win32con.WM_RBUTTONDOWN, win32con.MK_RBUTTON, 0)
-            win32api.SendMessage(self.game_window, win32con.WM_RBUTTONUP, 0, 0)
+            ctypes.windll.user32.mouse_event(0x0008, 0, 0, 0, 0)
+            ctypes.windll.user32.mouse_event(0x0010, 0, 0, 0, 0)
         else:
             raise ValueError(f"Invalid button: {button}")
+
+    def enum_windows_callback(self, hwnd, lParam):
+        # Callback function for EnumWindows that checks for the game window
+        if ctypes.windll.user32.IsWindowVisible(hwnd):
+            length = ctypes.windll.user32.GetWindowTextLengthW(hwnd) + 1
+            title = ctypes.create_unicode_buffer(length)
+            ctypes.windll.user32.GetWindowTextW(hwnd, title, length)
+            if title.value == 'Runelite':
+                self.game_window = hwnd
+        return True
+
+    def get_window_rect(self):
+        # Get the game window position and size
+        rect = ctypes.wintypes.RECT()
+        ctypes.windll.user32.GetWindowRect(self.game_window, ctypes.byref(rect))
+        return rect.left, rect.top, rect.right, rect.bottom
