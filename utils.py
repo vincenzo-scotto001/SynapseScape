@@ -6,17 +6,12 @@ import numpy as np
 import pyautogui
 
 
-def generate_bezier_curve(start_pos, end_pos, complexity=8, steps=50):
+import random
+import numpy as np
+import pyautogui
+
+def generate_bezier_curve(start_pos, end_pos, complexity=8, steps=50, window_size=(800, 600)):
     """Generate a smooth Bezier curve given start and end points using random midpoint displacement"""
-    # Get the screen resolution
-    user32 = ctypes.windll.user32
-    screen_width = user32.GetSystemMetrics(0)
-    screen_height = user32.GetSystemMetrics(1)
-
-    # Scale the points to match the screen resolution
-    start_pos = (start_pos[0] * screen_width, start_pos[1] * screen_height)
-    end_pos = (end_pos[0] * screen_width, end_pos[1] * screen_height)
-
     # Initialize the curve with the start and end points
     curve_points = [start_pos, end_pos]
 
@@ -32,19 +27,26 @@ def generate_bezier_curve(start_pos, end_pos, complexity=8, steps=50):
         new_points.append(end_pos)
         curve_points = new_points
 
-        final_curve_points = []
-        for t in np.linspace(0, 1, steps):
-            x, y = _bezier(t, curve_points)
-            final_curve_points.append((x, y))
+    # Scale the curve points to match the game window size
+    window_width, window_height = window_size
+    scale_factor_x = window_width / 1.0
+    scale_factor_y = window_height / 1.0
+    curve_points_scaled = [(int(p[0] * scale_factor_x), int(p[1] * scale_factor_y)) for p in curve_points]
+
+    # Generate the final Bezier curve with a higher number of steps
+    final_curve_points = []
+    for t in np.linspace(0, 1, steps):
+        x, y = _bezier(t, curve_points_scaled)
+        final_curve_points.append((x, y))
 
     # Return the final curve points
     return final_curve_points
 
 
-def smooth_move_bezier(start_pos, end_pos, duration=0.25, complexity=4, steps=50):
+def smooth_move_bezier(start_pos, end_pos, duration=0.25, complexity=4, steps=50, window_size=(800, 600)):
     """Move the mouse cursor smoothly along a Bezier curve generated using random midpoint displacement"""
     # Generate the Bezier curve
-    curve_points = generate_bezier_curve(start_pos, end_pos, complexity, steps)
+    curve_points = generate_bezier_curve(start_pos, end_pos, complexity, steps, window_size)
 
     # Calculate the duration between each step
     duration_per_step = duration / len(curve_points)
@@ -65,4 +67,3 @@ def _bezier(t, control_points):
         x += coeff * control_points[i][0]
         y += coeff * control_points[i][1]
     return x, y
-

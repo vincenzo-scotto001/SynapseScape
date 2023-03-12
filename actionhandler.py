@@ -73,10 +73,13 @@ class OSRSGame:
 
     def show_cursor_position(self):
         while True:
-            game_x, game_y = self.get_cursor_position_abs()
+            game_x, game_y = self.get_cursor_position_rel()
             print(f"Cursor position relative to game window center: ({game_x}, {game_y})")
             time.sleep(0.1)
 
 game = OSRSGame()
+size = (game.right - game.left, game.bottom - game.top)
+print(size)
+game.show_cursor_position()
 #game.move_mouse(734, 672)
-smooth_move_bezier((-.25, 0.5), (.75, .5), duration=2, complexity=4, steps=50)
+#smooth_move_bezier((-.25, 0.5), (.75, .5), duration=2, complexity=4, steps=50, window_size=size)
