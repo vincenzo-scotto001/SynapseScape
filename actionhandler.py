@@ -3,6 +3,7 @@ import ctypes
 import time
 
 from ctypes import wintypes
+from utils import smooth_move_bezier
 
 class OSRSGame:
     def __init__(self):
@@ -57,19 +58,25 @@ class OSRSGame:
         ctypes.windll.user32.GetWindowRect(self.game_window, ctypes.byref(rect))
         return rect.left, rect.top, rect.right, rect.bottom
         
-    def get_cursor_position(self):
+    def get_cursor_position_rel(self):
         # Get the position of the mouse cursor within the game window relative to the bottom-left corner of the game window
         cursor = wintypes.POINT()
         ctypes.windll.user32.GetCursorPos(ctypes.byref(cursor))
         relative_x = cursor.x - self.left
         relative_y = self.bottom - cursor.y
         return relative_x, relative_y
+    
+    def get_cursor_position_abs(self):
+        cursor = wintypes.POINT()
+        ctypes.windll.user32.GetCursorPos(ctypes.byref(cursor))
+        return cursor.x, cursor.y
 
     def show_cursor_position(self):
         while True:
-            game_x, game_y = self.get_cursor_position()
+            game_x, game_y = self.get_cursor_position_abs()
             print(f"Cursor position relative to game window center: ({game_x}, {game_y})")
             time.sleep(0.1)
 
 game = OSRSGame()
-game.show_cursor_position()
+#game.move_mouse(734, 672)
+smooth_move_bezier((-.25, 0.5), (.75, .5), duration=2, complexity=4, steps=50)
