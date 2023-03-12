@@ -1,12 +1,18 @@
 import pyautogui
 import ctypes
+import time
+
+from ctypes import wintypes
 
 class OSRSGame:
     def __init__(self):
         # Find the game window
         self.game_window = None
         user32 = ctypes.windll.user32
-        user32.EnumWindows(self.enum_windows_callback, 0)
+        
+        #user32.EnumWindows(self.enum_windows_callback, 0)
+        ENUM_WINDOWS_PROC = ctypes.WINFUNCTYPE(ctypes.c_bool, wintypes.HWND, wintypes.LPARAM)
+        user32.EnumWindows(ENUM_WINDOWS_PROC(self.enum_windows_callback), 0)
 
         if not self.game_window:
             raise Exception("Could not find Runelite window")
@@ -41,7 +47,7 @@ class OSRSGame:
             length = ctypes.windll.user32.GetWindowTextLengthW(hwnd) + 1
             title = ctypes.create_unicode_buffer(length)
             ctypes.windll.user32.GetWindowTextW(hwnd, title, length)
-            if title.value == 'Runelite':
+            if title.value == 'RuneLite':
                 self.game_window = hwnd
         return True
 
@@ -50,3 +56,20 @@ class OSRSGame:
         rect = ctypes.wintypes.RECT()
         ctypes.windll.user32.GetWindowRect(self.game_window, ctypes.byref(rect))
         return rect.left, rect.top, rect.right, rect.bottom
+        
+    def get_cursor_position(self):
+        # Get the position of the mouse cursor within the game window relative to the bottom-left corner of the game window
+        cursor = wintypes.POINT()
+        ctypes.windll.user32.GetCursorPos(ctypes.byref(cursor))
+        relative_x = cursor.x - self.left
+        relative_y = self.bottom - cursor.y
+        return relative_x, relative_y
+
+    def show_cursor_position(self):
+        while True:
+            game_x, game_y = self.get_cursor_position()
+            print(f"Cursor position relative to game window center: ({game_x}, {game_y})")
+            time.sleep(0.1)
+
+game = OSRSGame()
+game.show_cursor_position()
