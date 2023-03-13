@@ -6,14 +6,23 @@ import json
 
 nest_asyncio.apply()
 
+async def handle_state(data):
+    inventory = ast.literal_eval(data['inventory'])
+    valid_movements = ast.literal_eval(data['valid_movements'])
+    hitpoints = data['hitpoints']
+    print(hitpoints)
+
+async def handle_status(data):
+    zoom = data['zoom']
+    print(zoom)
+
 async def handle_data(data):
-    state = json.loads(data)
-    print(state)
-    inventory = ast.literal_eval(state['inventory'])
-    valid_movements = ast.literal_eval(state['valid_movements'])
-    hitpoints = state['hitpoints']
-    print('Inventory: ', inventory)
-    print(len(valid_movements))
+    data = json.loads(data)
+    if data['type']:
+        await handle_status(data)
+    else:
+        await handle_state(data)
+
 
 async def handle_message(websocket):
     try:
