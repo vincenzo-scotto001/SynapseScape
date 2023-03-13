@@ -48,7 +48,7 @@ class OSRSGame:
             length = ctypes.windll.user32.GetWindowTextLengthW(hwnd) + 1
             title = ctypes.create_unicode_buffer(length)
             ctypes.windll.user32.GetWindowTextW(hwnd, title, length)
-            if title.value == 'RuneLite':
+            if title.value == 'RuneLite - SynapseScape':
                 self.game_window = hwnd
         return True
 
@@ -63,7 +63,7 @@ class OSRSGame:
         cursor = wintypes.POINT()
         ctypes.windll.user32.GetCursorPos(ctypes.byref(cursor))
         relative_x = cursor.x - self.left
-        relative_y = self.bottom - cursor.y
+        relative_y = cursor.y - self.top
         return relative_x, relative_y
     
     def get_cursor_position_abs(self):
