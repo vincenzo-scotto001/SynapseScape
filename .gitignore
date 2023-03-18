@@ -1,10 +1,14 @@
 notebooks/data
 notebooks/cifar_net.pth
 .ipynb_checkpoints/
+.devcontainer
+.vscode
 key.txt
+regions
 
 # Byte-compiled / optimized / DLL files
-__pycache__/
+*__pycache__/
+**/*.pyc
 *.py[cod]
 *$py.class
 
