@@ -77,7 +77,7 @@ class OldSchoolRunescapeEnv(gym.Env):
         Renders the environment.
 
         Args:
-            mode (str, optional): The mode to use for rendering. Defaults to "human".
+            mode (str, optional): The mode to use for rendering.
         """
         # Implement the rendering logic
 
