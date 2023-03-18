@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List, Union, Tuple, Dict
+from typing import List, Optional, Tuple, Dict
 from interactibles import InteractibleObject
 
 @dataclass
